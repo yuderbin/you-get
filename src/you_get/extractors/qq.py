@@ -16,6 +16,7 @@ def qq_download_by_vid(vid, title, output_dir='.', merge=True, info_only=False):
         mp4 = mp4[0]['keyid'].replace('.10', '.p') + '.mp4'
     else:
         mp4 = output_json['vl']['vi'][0]['fn']
+    title = output_json['vl']['vi'][0]['ti']
     url = '%s/%s?vkey=%s' % ( url, mp4, fvkey )
     _, ext, size = url_info(url, faker=True)
 
@@ -43,6 +44,10 @@ def qq_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     elif 'iframe/player.html' in url:
         vid = match1(url, r'\bvid=(\w+)')
         # for embedded URLs; don't know what the title is
+        title = vid
+    elif 'vid=' in url:
+        # http://v.qq.com/x/cover/rzvuolbrcpwj0xs.html?vid=y0306vffnle
+        vid = match1(url, r'vid=(\w+)')
         title = vid
     else:
         content = get_html(url)
