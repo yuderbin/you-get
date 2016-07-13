@@ -14,7 +14,7 @@ def get_k(vid, rand):
 
 def video_info_xml(vid):
     rand = "0.{0}{1}".format(randint(10000, 10000000), randint(10000, 10000000))
-    url = 'http://v.iask.com/v_play.php?vid={0}&ran={1}&p=i&k={2}'.format(vid, rand, get_k(vid, rand))
+    url = 'http://ask.ivideo.sina.com.cn/v_play.php?vid={0}&ran={1}&p=i&k={2}'.format(vid, rand, get_k(vid, rand))
     xml = get_content(url, headers=fake_headers, decoded=True)
     return xml
 
@@ -65,13 +65,21 @@ def sina_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     vid = match1(url, r'vid=(\d+)')
     if vid is None:
         video_page = get_content(url)
-        vid = hd_vid = match1(video_page, r'hd_vid\s*:\s*\'([^\']+)\'')
-        if hd_vid == '0':
-            vids = match1(video_page, r'[^\w]vid\s*:\s*\'([^\']+)\'').split('|')
-            vid = vids[-1]
+        vid = match1(video_page, r'vid\s*:\s*\'([^\']+)\'')
+        if vid == '0':
+            vid = None
+            vids = match1(video_page, r'[^\w]hd_vid\s*:\s*\'([^\']+)\'')
+            if vids and vids != '0':
+                vid = vids.split('|')[-1]
 
     if vid is None:
         vid = match1(video_page, r'vid:(\d+)')
+    if vid is None:
+        video_id = match1(video_page, r'video_id\s*:\s*\'([^\']+)\'')
+        if video_id:
+            # http://s.video.sina.com.cn/video/play?video_id=249276984&play=flash
+            sina_download('http://video.sina.com.cn/view/%s.html' % (video_id,), output_dir, merge, info_only, **kwargs)
+            return
     if vid:
         title = match1(video_page, r'title\s*:\s*\'([^\']+)\'')
         sina_download_by_vid(vid, title=title, output_dir=output_dir, merge=merge, info_only=info_only)
