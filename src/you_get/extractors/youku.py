@@ -275,7 +275,7 @@ class Youku(VideoExtractor):
                 exit(2)
         else:
             # Extract stream with the best quality
-            stream_id = self.streams_sorted[0]['id']
+            stream_id = self.streams_sorted[len(self.streams_sorted) - 1]['id']
 
         e_code = self.__class__.trans_e(
             self.f_code_1,
